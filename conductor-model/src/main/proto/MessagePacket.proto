@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package cn.yayatao.middleware.conductor.protobuf;
+
+option optimize_for = SPEED;
+option java_package = "cn.yayatao.middleware.conductor.protobuf";
+option java_outer_classname = "MessagePacketModel";
+
+
+message MessagePacket{
+    string id = 1;
+    int32 type = 2;
+    string data = 3;
+}
