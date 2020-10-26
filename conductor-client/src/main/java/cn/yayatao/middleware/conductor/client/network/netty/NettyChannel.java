@@ -76,4 +76,9 @@ public class NettyChannel implements MessageChannel {
     public boolean isClosed() {
         return closed;
     }
+
+    @Override
+    public boolean isConnected() {
+        return !isClosed() && channel.isActive();
+    }
 }

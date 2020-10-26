@@ -6,15 +6,12 @@ import cn.yayatao.middleware.conductor.model.URL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetSocketAddress;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-public abstract class AbstractClient implements MessageClient {
+public abstract class AbstractClient implements MessageClient, MessageChannelHandler {
     private final static Logger LOGGER = LoggerFactory.getLogger(AbstractClient.class);
-
-    private Lock lock = new ReentrantLock(false);
-
+    protected final URL url;
     /***
      * 是否已经关闭
      */
@@ -24,22 +21,19 @@ public abstract class AbstractClient implements MessageClient {
      * 是否连成功
      */
     protected volatile boolean connected = false;
-
-    protected final URL url;
-
-    protected  MessageChannelHandler channelHandler;
-
-    private int closeTimeout =  1000;
+    protected MessageChannelHandler channelHandler;
+    private final Lock lock = new ReentrantLock(false);
+    private final int closeTimeout = 1000;
 
     private ClientConfig config;
 
 
-    public AbstractClient(URL url, MessageChannelHandler channelHandler) throws NetworkException{
+    public AbstractClient(URL url, MessageChannelHandler channelHandler) throws NetworkException {
         this.url = url;
         this.channelHandler = channelHandler;
-        try{
+        try {
             initClient();
-        }catch (Throwable e){
+        } catch (Throwable e) {
             close(closeTimeout);
         }
     }
@@ -55,18 +49,17 @@ public abstract class AbstractClient implements MessageClient {
      */
     protected abstract void doConnect() throws NetworkException;
 
-    protected void connect() throws  NetworkException{
+    protected void connect() throws NetworkException {
         lock.lock();
         try {
             doConnect();
             connected = true;
-        }catch (Throwable e){
-            LOGGER.error("连接远程服务出现异常:{} exception",getRemoteAddress(),e);
-        }finally {
+        } catch (Throwable e) {
+            LOGGER.error("连接远程服务出现异常:{} exception", getRemoteAddress(), e);
+        } finally {
             lock.unlock();
         }
     }
-
 
 
     @Override
@@ -78,11 +71,11 @@ public abstract class AbstractClient implements MessageClient {
     }
 
 
-    protected void disconnect(){
+    protected void disconnect() {
         lock.lock();
         try {
             MessageClient channel = getChannel();
-            if (channel != null){
+            if (channel != null) {
                 channel.close(closeTimeout);
             }
             try {
@@ -115,13 +108,42 @@ public abstract class AbstractClient implements MessageClient {
 
     @Override
     public void send(Object message) throws NetworkException {
-        send(message,config.getSendTimeout());
+        send(message, config.getSendTimeout());
     }
+
 
     @Override
     public void send(Object message, long timeout) throws NetworkException {
-        getChannel().send(message,timeout);
+        //未连接时, 发起连接
+        if (!isConnected()) {
+            connect();
+        }
+        MessageChannel messageChannel = getChannel();
+        if (messageChannel == null) {
+            throw new NetworkException("message can not send , because channel is closed , url :" + getURL());
+        }
+        //通过通道发送消息
+        messageChannel.send(message, timeout);
     }
 
+    @Override
+    public void connected(MessageChannel channel) throws NetworkException {
+        this.channelHandler.connected(channel);
+    }
 
+    @Override
+    public void disconnected(MessageChannel channel) throws NetworkException {
+        this.channelHandler.disconnected(channel);
+    }
+
+    @Override
+    public void received(MessageChannel channel, Object message) throws NetworkException {
+        this.channelHandler.received(channel, message);
+    }
+
+    @Override
+    public boolean isConnected() {
+        MessageChannel channel = getChannel();
+        return this.connected && channel != null && channel.isConnected();
+    }
 }

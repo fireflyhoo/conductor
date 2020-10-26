@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
  *
  * @author fireflyhoo
  */
-public class NettyClient extends AbstractClient implements MessageChannel, MessageChannelHandler {
+public class NettyClient extends AbstractClient implements MessageChannel {
     public static final int DEFAULT_IO_THREADS = Math.min(Runtime.getRuntime().availableProcessors() + 1, 32);
 
     /**
@@ -42,7 +42,7 @@ public class NettyClient extends AbstractClient implements MessageChannel, Messa
             new DefaultThreadFactory("conductor-client-heartbeat", true));
 
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(NettyClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NettyClient.class);
     private Bootstrap bootstrap;
     private NioEventLoopGroup worker;
     private Channel channel;
@@ -130,7 +130,7 @@ public class NettyClient extends AbstractClient implements MessageChannel, Messa
      *开始心跳
      */
     private void startHeatbeatTimer() {
-        stopHeatbeatTimer();
+        stopHeartbeatTimer();
         long heartbeat = config.getHeatbeatInterval();
         heartbeatTimer = scheduled.scheduleWithFixedDelay(new HeartBeatTask(),
                 heartbeat,heartbeat,TimeUnit.MICROSECONDS);
@@ -147,8 +147,11 @@ public class NettyClient extends AbstractClient implements MessageChannel, Messa
     /***
      * 停止心跳
      */
-    private void stopHeatbeatTimer() {
-
+    private void stopHeartbeatTimer() {
+        //取消系统调度信息
+        if(heartbeatTimer != null &&  !heartbeatTimer.isCancelled()){
+            heartbeatTimer.cancel(true);
+        }
     }
 
     @Override
@@ -160,6 +163,8 @@ public class NettyClient extends AbstractClient implements MessageChannel, Messa
         }
 
     }
+
+
 
     @Override
     protected MessageClient getChannel() {
@@ -181,43 +186,25 @@ public class NettyClient extends AbstractClient implements MessageChannel, Messa
         return null;
     }
 
-    @Override
-    public void send(Object message) throws NetworkException {
 
-    }
-
-    @Override
-    public void send(Object message, long timeout) throws NetworkException {
-
-    }
 
     @Override
     public boolean isClosed() {
-        return false;
+        return this.closed;
     }
 
     @Override
     public void close(int closeTimeout) {
-
+        NettyChannels.removeChannelIfDisconnected(channel);
+        channel.close();
+        closed = true;
     }
 
-    @Override
-    public void connected(MessageChannel channel) throws NetworkException {
 
-    }
 
-    @Override
-    public void disconnected(MessageChannel channel) throws NetworkException {
-
-    }
-
-    @Override
-    public void received(MessageChannel channel, Object message) throws NetworkException {
-
-    }
 
     @Override
     public void caught(MessageChannel channel, Throwable throwable) {
-
+        LOGGER.warn("异常信息",throwable);
     }
 }

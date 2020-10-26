@@ -56,4 +56,5 @@ public interface MessageChannel {
      */
     boolean isClosed();
 
+    boolean isConnected();
 }

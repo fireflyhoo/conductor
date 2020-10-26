@@ -33,7 +33,6 @@
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
             <version>30.0-jre</version>
-            <type>bundle</type>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>
