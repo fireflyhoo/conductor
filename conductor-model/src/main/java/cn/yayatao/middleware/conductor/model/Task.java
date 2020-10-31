@@ -22,6 +22,12 @@ public class Task {
      */
     private String content;
 
+
+    /****
+     * 计划执行时间
+     */
+    private Long planTime;
+
     /***
      * 任务时间
      */
