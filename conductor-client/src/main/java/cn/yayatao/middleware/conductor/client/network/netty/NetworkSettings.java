@@ -7,7 +7,7 @@ import java.util.concurrent.TimeUnit;
  */
 public final class NetworkSettings {
 
-    public static final long READ_IDLE_TIME = 0;
+    public static final long READ_IDLE_TIME = 5;
     /***
      * 超时时间 5s 空闲发个心跳
      */
@@ -20,5 +20,5 @@ public final class NetworkSettings {
     /**
      * 写空闲时间
      */
-    public static final long WRITE_IDLE_TIME = 0;
+    public static final long WRITE_IDLE_TIME = 5;
 }

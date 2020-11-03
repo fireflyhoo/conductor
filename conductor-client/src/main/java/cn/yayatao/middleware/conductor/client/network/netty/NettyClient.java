@@ -5,7 +5,6 @@ import cn.yayatao.middleware.conductor.client.exception.NetworkException;
 import cn.yayatao.middleware.conductor.client.network.AbstractClient;
 import cn.yayatao.middleware.conductor.client.network.MessageChannel;
 import cn.yayatao.middleware.conductor.client.network.MessageChannelHandler;
-import cn.yayatao.middleware.conductor.client.network.MessageClient;
 import cn.yayatao.middleware.conductor.model.URL;
 import cn.yayatao.middleware.conductor.protobuf.MessagePacketModel;
 import io.netty.bootstrap.Bootstrap;
@@ -46,16 +45,14 @@ public class NettyClient extends AbstractClient implements MessageChannel {
     private Bootstrap bootstrap;
     private NioEventLoopGroup worker;
     private Channel channel;
-    private Integer connectTimeout = 3000;
-    private ClientConfig config = new  ClientConfig();
-
+    private final Integer connectTimeout = 3000;
+    private final ClientConfig config = new ClientConfig();
 
 
     /**
      * 心跳定时器
      */
     private ScheduledFuture<?> heartbeatTimer;
-
 
 
     public NettyClient(URL url, MessageChannelHandler channelHandler) throws NetworkException {
@@ -65,7 +62,7 @@ public class NettyClient extends AbstractClient implements MessageChannel {
     @Override
     protected void initClient() {
         bootstrap = new Bootstrap();
-        worker = new NioEventLoopGroup(DEFAULT_IO_THREADS, new DefaultThreadFactory("netty-client-worker",true));
+        worker = new NioEventLoopGroup(DEFAULT_IO_THREADS, new DefaultThreadFactory("netty-client-worker", true));
         bootstrap.group(worker);
         bootstrap.option(ChannelOption.SO_KEEPALIVE, true)
                 .option(ChannelOption.TCP_NODELAY, true)
@@ -106,21 +103,21 @@ public class NettyClient extends AbstractClient implements MessageChannel {
                         }
                     }
                 });
-                channelFuture.awaitUninterruptibly(30000, TimeUnit.MICROSECONDS);
+                channelFuture.awaitUninterruptibly(3000, TimeUnit.MILLISECONDS);
             } catch (Throwable e) {
                 e.printStackTrace();
                 // IGNORE
             }
-            if ( channelFuture != null &&  channelFuture.isSuccess()) {
+            if (channelFuture != null && channelFuture.isSuccess()) {
                 this.channel = channelFuture.channel();
                 NettyChannels.getOrAddChannel(this.channel, this.url, this.channelHandler);
                 startHeatbeatTimer();
-                return ;
+                return;
             }
             retrys--;
         } while ((channelFuture == null || !channelFuture.channel().isActive()) && retrys > 0);
 
-        if (retrys <= 0 && (channelFuture == null ||  !channelFuture.isSuccess())) {
+        if (retrys <= 0 && (channelFuture == null || !channelFuture.isSuccess())) {
             throw new NetworkException("client(url: " + getURL() + ") failed to connect to server "
                     + getRemoteAddress() + " client-side timeout "
                     + config.getConnectTimeout() + "ms (elapsed: " + (System.currentTimeMillis() - start) + "ms) from netty client " + getLocalAddress());
@@ -135,15 +132,7 @@ public class NettyClient extends AbstractClient implements MessageChannel {
         stopHeartbeatTimer();
         long heartbeat = config.getHeatbeatInterval();
         heartbeatTimer = scheduled.scheduleWithFixedDelay(new HeartBeatTask(),
-                heartbeat,heartbeat,TimeUnit.MICROSECONDS);
-    }
-
-
-    class HeartBeatTask implements Runnable{
-        @Override
-        public void run() {
-
-        }
+                heartbeat, heartbeat, TimeUnit.MILLISECONDS);
     }
 
     /***
@@ -151,7 +140,7 @@ public class NettyClient extends AbstractClient implements MessageChannel {
      */
     private void stopHeartbeatTimer() {
         //取消系统调度信息
-        if(heartbeatTimer != null &&  !heartbeatTimer.isCancelled()){
+        if (heartbeatTimer != null && !heartbeatTimer.isCancelled()) {
             heartbeatTimer.cancel(true);
         }
     }
@@ -166,11 +155,9 @@ public class NettyClient extends AbstractClient implements MessageChannel {
 
     }
 
-
-
     @Override
     protected MessageChannel getChannel() {
-        return NettyChannels.getOrAddChannel(channel,url,this);
+        return NettyChannels.getOrAddChannel(channel, url, this);
     }
 
     @Override
@@ -185,10 +172,8 @@ public class NettyClient extends AbstractClient implements MessageChannel {
 
     @Override
     public InetSocketAddress getRemoteAddress() {
-        return new InetSocketAddress(getURL().getHost(),getURL().getPort());
+        return new InetSocketAddress(getURL().getHost(), getURL().getPort());
     }
-
-
 
     @Override
     public boolean isClosed() {
@@ -202,11 +187,21 @@ public class NettyClient extends AbstractClient implements MessageChannel {
         closed = true;
     }
 
-
-
-
     @Override
     public void caught(MessageChannel channel, Throwable throwable) {
-        LOGGER.warn("异常信息",throwable);
+        LOGGER.warn("异常信息", throwable);
+    }
+
+    class HeartBeatTask implements Runnable {
+        @Override
+        public void run() {
+            MessageChannel messageChannel = NettyChannels.getOrAddChannel(channel, url, NettyClient.this);
+            try {
+                messageChannel.send(MessagePacketModel.MessagePacket.newBuilder().setData("PING").setType(1).build());
+                LOGGER.info("ping");
+            } catch (NetworkException e) {
+                LOGGER.warn("心跳失败", e);
+            }
+        }
     }
 }
