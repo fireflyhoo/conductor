@@ -3,7 +3,9 @@ package cn.yayatao.middleware.conductor.client.network.netty;
 import cn.yayatao.middleware.conductor.client.network.MessageChannelHandler;
 import cn.yayatao.middleware.conductor.model.URL;
 import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandler;
 
+@ChannelHandler.Sharable
 public class NettyClientHandler extends ChannelDuplexHandler {
 
     private final URL url ;

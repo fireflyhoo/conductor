@@ -35,7 +35,7 @@ public class ClientConfig {
     /**
      * 连接重试次数
      */
-    private int retryTimes;
+    private int retryTimes = 3;
 
 
 
@@ -47,7 +47,7 @@ public class ClientConfig {
     /***
      * 心跳间隔时间
      */
-    private long heatbeatInterval;
+    private long heatbeatInterval = 100000;
 
 
 
