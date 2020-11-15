@@ -1,21 +1,21 @@
 package cn.yayatao.middleware.conductor.model;
 
 /**
- * 任务模板
+ * 任务主题
  * @author fireflyhoo
  */
-public class TaskTemplate {
+public class TaskTopic {
 
     /**
-     * 模板名称
+     * 主题名称
      */
-    private String templateName;
+    private String topicName;
 
 
     /***
-     * 模板说明
+     * 主题说明
      */
-    private String templateDesc;
+    private String  topicDesc;
 
     /***
      * 延时时间(ms)

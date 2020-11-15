@@ -7,7 +7,7 @@ public class Task {
     /**
      * 任务模板ID , 模板定义任务的执行类型,延时,超时,回调方式等
      */
-    private String taskTemplate;
+    private String taskTopic;
 
 
 
