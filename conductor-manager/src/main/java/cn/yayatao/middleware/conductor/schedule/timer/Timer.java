@@ -1,9 +1,11 @@
-package cn.yayatao.middleware.conductor.schedule;
+package cn.yayatao.middleware.conductor.schedule.timer;
 
 import cn.yayatao.middleware.conductor.common.LifeCycle;
 
-public class TaskScheduler implements LifeCycle {
-
+/***
+ * 定时器核心,用于任务调度
+ */
+public class Timer implements LifeCycle {
 
 
     @Override
@@ -20,6 +22,4 @@ public class TaskScheduler implements LifeCycle {
     public boolean isRunning() {
         return false;
     }
-
-
 }
