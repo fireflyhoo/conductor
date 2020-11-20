@@ -36,7 +36,9 @@ public class NamedThreadFactory implements ThreadFactory {
         String name = String.join("-", id, String.valueOf(n.getAndIncrement()));
         Thread thread = new Thread(r, name);
         thread.setPriority(priority);
-        thread.setDaemon(daemon);
+        if(this.daemon){
+            thread.setDaemon(true);
+        }
         if (contextClassLoader != null) {
             thread.setContextClassLoader(contextClassLoader);
         }

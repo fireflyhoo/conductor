@@ -1,6 +1,7 @@
 package cn.yayatao.middleware.conductor.schedule.timer;
 
 import cn.yayatao.middleware.conductor.common.LifeCycle;
+import cn.yayatao.middleware.conductor.exception.ConductorRuntimeException;
 import cn.yayatao.middleware.conductor.thread.NamedThreadFactory;
 import com.google.common.base.Preconditions;
 
@@ -50,7 +51,7 @@ public class Timer implements LifeCycle {
     /**
      * 定时器状态
      */
-    private final AtomicInteger workerState = new AtomicInteger();
+    private final AtomicInteger workerState = new AtomicInteger(WORKER_STATE_INIT);
 
     public Timer(long lowestTickMs, int lowestWheelSize) {
         this(lowestTickMs, lowestWheelSize, new NamedThreadFactory("multi-timer-boss"));
@@ -74,7 +75,14 @@ public class Timer implements LifeCycle {
         if (workerState.get() == WORKER_STATE_INIT) {
             workerState.compareAndSet(WORKER_STATE_INIT, WORKER_STATE_STARTED);
             bossThread.start();
-            return;
+            while (!started.get()){
+                try {
+                    this.startTimeInitialized.await();
+                } catch (InterruptedException e) {
+                    // Ignore - it will be ready very soon.
+                }
+            }
+            return ;
         }
         if (workerState.get() == WORKER_STATE_STARTED) {
             return;
@@ -83,14 +91,7 @@ public class Timer implements LifeCycle {
             throw new IllegalStateException("can't be started once stopped");
         }
         throw new IllegalStateException("Invalid  WorkerState");
-        while (!started.get()){
-            try {
-//                this.startTimeInitialized.await();
-                System.out.println(""xx"");
-            } catch (InterruptedException e) {
-                // Ignore - it will be ready very soon.
-            }
-        }
+
 
     }
 
@@ -101,13 +102,48 @@ public class Timer implements LifeCycle {
 
     @Override
     public boolean isRunning() {
-        return false;
+        return started.get();
     }
 
     class BossWorker implements Runnable {
         @Override
         public void run() {
+            started.compareAndSet(false,true);
             startTimeInitialized.countDown();
+            do {
+                Timer.this.execute();
+                System.out.println("execute");
+            }while (workerState.get() == WORKER_STATE_STARTED);
+        }
+    }
+
+    /****
+     * 循环执行任务
+     */
+    private void execute() {
+        try{
+            TimerTaskList timerTaskList = delayQueue.poll(this.lowestTickMs, TimeUnit.MILLISECONDS);
+            if(timerTaskList != null){
+                lowestWheel.nextTick(timerTaskList.getExpiration());
+                //执行过期任务
+                timerTaskList.pop(this::addTask);
+            }
+        }catch (Exception e){
+            //NOOP
+        }
+
+    }
+
+    /***
+     * 添加定时任务
+     * @param timerTask
+     */
+    public void addTask(TimerTask timerTask) {
+        if(workerState.get() != WORKER_STATE_STARTED){
+            throw  new ConductorRuntimeException("timer not runing");
+        }
+        if(!lowestWheel.addTimerTask(timerTask)){
+            workerThreadPool.submit(timerTask.getTask());
         }
     }
 }
