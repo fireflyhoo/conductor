@@ -3,8 +3,15 @@ package cn.yayatao.middleware.conductor.packet.client;
 import cn.yayatao.middleware.conductor.packet.Packet;
 
 public class CancelTask implements Packet {
+
+    private int type = Type.CANCEL_TASK.getValue();
+
     @Override
-    public Type getType() {
-        return Type.CANCEL_TASK;
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 }

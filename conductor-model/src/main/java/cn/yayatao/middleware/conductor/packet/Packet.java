@@ -7,7 +7,7 @@ public interface Packet extends Serializable {
      * 获取类型
      * @return
      */
-    Type getType();
+    int getType();
 
 
     /***
@@ -19,8 +19,10 @@ public interface Packet extends Serializable {
         REGISTER_TOPIC(3),
         ADD_TASK(4),
         ACK_EXECUTE_TASK(5),
-        CANCEL_TASK(6)
+        CANCEL_TASK(6),
+        EXECUTE_TASK(7)
         ;
+
 
         /***
          * 数据包值
@@ -29,6 +31,11 @@ public interface Packet extends Serializable {
 
         Type(int value) {
             this.value = value;
+        }
+
+
+        public int getValue() {
+            return value;
         }
 
 

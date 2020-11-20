@@ -7,8 +7,14 @@ import cn.yayatao.middleware.conductor.packet.Packet;
  */
 public class AckExecuteTask  implements Packet {
 
+    private int type =  Packet.Type.ACK_EXECUTE_TASK.getValue();
+
     @Override
-    public Type getType() {
-        return Packet.Type.ACK_EXECUTE_TASK;
+    public int getType() {
+        return type;
+    }
+
+    public void setType(int type) {
+        this.type = type;
     }
 }
