@@ -1,5 +1,6 @@
 package cn.yayatao.middleware.conductor.packet.client;
 
+import cn.yayatao.middleware.conductor.model.Task;
 import cn.yayatao.middleware.conductor.packet.Packet;
 
 /***
@@ -8,9 +9,20 @@ import cn.yayatao.middleware.conductor.packet.Packet;
 public class AddTask implements Packet {
     private int type = Type.ADD_TASK.getValue();
 
+    //任务信息
+    private Task task;
+
     @Override
     public int getType() {
         return type;
+    }
+
+    public Task getTask() {
+        return task;
+    }
+
+    public void setTask(Task task) {
+        this.task = task;
     }
 
     public void setType(int type) {

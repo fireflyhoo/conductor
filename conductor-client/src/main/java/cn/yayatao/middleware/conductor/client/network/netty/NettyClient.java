@@ -6,7 +6,7 @@ import cn.yayatao.middleware.conductor.client.network.AbstractClient;
 import cn.yayatao.middleware.conductor.client.network.MessageChannel;
 import cn.yayatao.middleware.conductor.client.network.MessageChannelHandler;
 import cn.yayatao.middleware.conductor.model.URL;
-import cn.yayatao.middleware.conductor.protobuf.MessagePacketModel;
+import cn.yayatao.middleware.conductor.protobuf.MessageModel;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -42,13 +42,11 @@ public class NettyClient extends AbstractClient implements MessageChannel {
 
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NettyClient.class);
+    private final Integer connectTimeout = 3000;
+    private final ClientConfig config = new ClientConfig();
     private Bootstrap bootstrap;
     private NioEventLoopGroup worker;
     private Channel channel;
-    private final Integer connectTimeout = 3000;
-    private final ClientConfig config = new ClientConfig();
-
-
     /**
      * 心跳定时器
      */
@@ -77,7 +75,7 @@ public class NettyClient extends AbstractClient implements MessageChannel {
                         .addLast(new IdleStateHandler(NetworkSettings.READ_IDLE_TIME, NetworkSettings.WRITE_IDLE_TIME,
                                 NetworkSettings.ALL_IDLE_TIME, NetworkSettings.IDLE_TIME_UNIT))
                         .addLast(new ProtobufVarint32FrameDecoder())
-                        .addLast(new ProtobufDecoder(MessagePacketModel.MessagePacket.getDefaultInstance()))
+                        .addLast(new ProtobufDecoder(MessageModel.MessagePacket.getDefaultInstance()))
                         .addLast(new ProtobufVarint32LengthFieldPrepender())
                         .addLast(new ProtobufEncoder())
                         .addLast(clientHandler);
@@ -197,7 +195,7 @@ public class NettyClient extends AbstractClient implements MessageChannel {
         public void run() {
             MessageChannel messageChannel = NettyChannels.getOrAddChannel(channel, url, NettyClient.this);
             try {
-                messageChannel.send(MessagePacketModel.MessagePacket.newBuilder().setData("PING").setType(1).build());
+                messageChannel.send(MessageModel.MessagePacket.newBuilder().setData("PING").setType(1).build());
                 LOGGER.info("ping");
             } catch (NetworkException e) {
                 LOGGER.warn("心跳失败", e);

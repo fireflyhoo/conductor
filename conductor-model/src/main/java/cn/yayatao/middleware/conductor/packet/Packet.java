@@ -13,15 +13,19 @@ public interface Packet extends Serializable {
     /***
      * 数据包类型
      */
-    enum  Type {
+    enum Type {
         PING(1),
         PONG(2),
         REGISTER_TOPIC(3),
         ADD_TASK(4),
         ACK_EXECUTE_TASK(5),
         CANCEL_TASK(6),
-        EXECUTE_TASK(7)
-        ;
+        EXECUTE_TASK(7),
+        AUTHENTICATION(8),
+        AUTHENTICATION_RESULT(9),
+        ERROR_RESULT(10),
+        MASTER_CHANGED(11),
+        ACK_ASK_MASTER(12);
 
 
         /***

@@ -16,6 +16,20 @@ public class ClientConfig {
 
 
     /***
+     * 访问授权码id
+     */
+    private  String accessKeyId;
+
+
+    /***
+     * 访问授权码秘钥
+     */
+    private  String accessKeySecret;
+
+
+
+
+    /***
      * 客户端组
      */
     private  String clientGroup;
@@ -44,10 +58,12 @@ public class ClientConfig {
      */
     private long connectTimeout;
 
+
     /***
      * 心跳间隔时间
      */
     private long heatbeatInterval = 100000;
+
 
 
 

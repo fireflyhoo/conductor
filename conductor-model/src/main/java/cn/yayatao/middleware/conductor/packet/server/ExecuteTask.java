@@ -1,5 +1,6 @@
 package cn.yayatao.middleware.conductor.packet.server;
 
+import cn.yayatao.middleware.conductor.model.Task;
 import cn.yayatao.middleware.conductor.packet.Packet;
 
 /***
@@ -7,6 +8,8 @@ import cn.yayatao.middleware.conductor.packet.Packet;
  */
 public class ExecuteTask {
     private int type = Packet.Type.EXECUTE_TASK.getValue();
+
+    private Task task;
 
     public int getType() {
         return type;
