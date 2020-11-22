@@ -1,5 +1,6 @@
 package cn.yayatao.middleware.conductor.packet.server;
 
+import cn.yayatao.middleware.conductor.model.URL;
 import cn.yayatao.middleware.conductor.packet.Packet;
 
 /**
@@ -17,6 +18,12 @@ public class AuthenticationResult implements Packet {
      * 会话令牌
      */
     private String  jwt;
+
+
+    /***
+     * 主节点信息
+     */
+    private URL masterUrl;
 
 
     private int type = Type.AUTHENTICATION_RESULT.getValue();

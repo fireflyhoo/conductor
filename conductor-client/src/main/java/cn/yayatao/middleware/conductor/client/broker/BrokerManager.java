@@ -1,9 +1,17 @@
 package cn.yayatao.middleware.conductor.client.broker;
 
+import cn.yayatao.middleware.conductor.client.exception.NetworkException;
 import cn.yayatao.middleware.conductor.client.network.MessageChannel;
+import cn.yayatao.middleware.conductor.client.network.MessageChannelHandler;
+import cn.yayatao.middleware.conductor.client.network.netty.NettyClient;
+import cn.yayatao.middleware.conductor.client.tools.PacketTools;
 import cn.yayatao.middleware.conductor.model.URL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -12,10 +20,19 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class BrokerManager {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(BrokerManager.class);
+
     /**
      * 存储当前活着的broker
      */
-    private Set<URL> currentBrokets = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<URL> currentBrokets = Collections.newSetFromMap(new ConcurrentHashMap<>());
+
+
+    /***
+     *
+     */
+    private final Map<URL, MessageChannel> urlMessageChannelMap = new ConcurrentHashMap<>();
+
 
     /***
      *
@@ -23,5 +40,52 @@ public class BrokerManager {
     private volatile MessageChannel brokerMaster;
 
 
+    private MessageChannelHandler channelHandler = new MessageChannelHandler() {
+        @Override
+        public void connected(MessageChannel channel) throws NetworkException {
 
+        }
+
+        @Override
+        public void disconnected(MessageChannel channel) throws NetworkException {
+
+        }
+
+        @Override
+        public void received(MessageChannel channel, Object message) throws NetworkException {
+
+        }
+
+        @Override
+        public void caught(MessageChannel channel, Throwable throwable) {
+
+        }
+    };
+
+
+    public void addBrokets(List<URL> urls) {
+        currentBrokets.addAll(urls);
+    }
+
+
+    public void askMaster(List<URL> brokers) {
+        brokers.stream().forEach(url -> {
+            try {
+                NettyClient client = new NettyClient(url, channelHandler);
+                urlMessageChannelMap.put(url, client);
+                client.send(PacketTools.auth());
+            } catch (NetworkException e) {
+                LOGGER.error("ask master to broker:{} exception", url, e);
+            }
+        });
+    }
+
+
+    public MessageChannel getBrokerMaster() {
+        return brokerMaster;
+    }
+
+    public void setBrokerMaster(MessageChannel brokerMaster) {
+        this.brokerMaster = brokerMaster;
+    }
 }
