@@ -24,12 +24,12 @@ public class ConductorClient {
      * 配置信息
      */
     private final ClientConfig config;
-    private final BrokerManager brokerManager = new BrokerManager();
+    private final BrokerManager brokerManager;
     private AtomicBoolean running = new AtomicBoolean();
 
     public ConductorClient(ClientConfig config) {
         this.config = config;
-
+        brokerManager = new BrokerManager(config);
     }
 
 
@@ -46,7 +46,10 @@ public class ConductorClient {
         List<URL> brokers = Splitter.on(",").omitEmptyStrings().trimResults().splitToList(serverhost).stream().map(o -> {
             return URL.valueOf(URLConstant.URL_SERVER_PROTOCOL + "://" + o);
         }).collect(Collectors.toList());
-        brokerManager.addBrokets(brokers);
+
+        //认证通过后会返回主节点
+        brokerManager.authBrokers(brokers);
+        brokerManager.addBrokers(brokers);
 
     }
 

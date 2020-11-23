@@ -1,5 +1,6 @@
 package cn.yayatao.middleware.conductor.client.broker;
 
+import cn.yayatao.middleware.conductor.client.config.ClientConfig;
 import cn.yayatao.middleware.conductor.client.exception.NetworkException;
 import cn.yayatao.middleware.conductor.client.network.MessageChannel;
 import cn.yayatao.middleware.conductor.client.network.MessageChannelHandler;
@@ -21,11 +22,11 @@ import java.util.concurrent.ConcurrentHashMap;
 public class BrokerManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BrokerManager.class);
-
+    private final ClientConfig config;
     /**
      * 存储当前活着的broker
      */
-    private final Set<URL> currentBrokets = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<URL> currentBrokers = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
 
     /***
@@ -40,7 +41,7 @@ public class BrokerManager {
     private volatile MessageChannel brokerMaster;
 
 
-    private MessageChannelHandler channelHandler = new MessageChannelHandler() {
+    private final MessageChannelHandler channelHandler = new MessageChannelHandler() {
         @Override
         public void connected(MessageChannel channel) throws NetworkException {
 
@@ -62,18 +63,22 @@ public class BrokerManager {
         }
     };
 
-
-    public void addBrokets(List<URL> urls) {
-        currentBrokets.addAll(urls);
+    public BrokerManager(ClientConfig config) {
+        this.config = config;
     }
 
 
-    public void askMaster(List<URL> brokers) {
+    public void addBrokers(List<URL> urls) {
+        currentBrokers.addAll(urls);
+    }
+
+
+    public void authBrokers(List<URL> brokers) {
         brokers.stream().forEach(url -> {
             try {
                 NettyClient client = new NettyClient(url, channelHandler);
                 urlMessageChannelMap.put(url, client);
-                client.send(PacketTools.auth());
+                client.send(PacketTools.auth(config.getAccessKeyId(),config.getAccessKeySecret()));
             } catch (NetworkException e) {
                 LOGGER.error("ask master to broker:{} exception", url, e);
             }

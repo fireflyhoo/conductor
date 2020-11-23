@@ -21,11 +21,19 @@ public class Authentication implements Packet {
      * 认证签名
      */
     private String signature;
-
-
-
+    /**
+     * 时间戳
+     */
+    private long time;
     private int type = Packet.Type.AUTHENTICATION.getValue();
 
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
+    }
 
     public String getAccessKeyId() {
         return accessKeyId;

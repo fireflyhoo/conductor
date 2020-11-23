@@ -7,65 +7,64 @@ public class ClientConfig {
     /**
      * 调度服务地址信息 localhost:1111,localhost:2222,localhost:3333
      */
-    private  String serverHosts;
+    private String serverHosts;
 
     /***
      * 任务执行是主动ack
      */
-    private  Boolean executedAutoCommit = true;
+    private Boolean executedAutoCommit = true;
 
 
     /***
      * 访问授权码id
      */
-    private  String accessKeyId;
+    private String accessKeyId;
 
 
     /***
      * 访问授权码秘钥
      */
-    private  String accessKeySecret;
-
-
-
-
+    private String accessKeySecret;
     /***
      * 客户端组
      */
-    private  String clientGroup;
-
-
+    private String clientGroup;
     /***
      * 启动消费
      */
-    private  boolean consumeEnable;
-
-
+    private boolean consumeEnable;
     /**
      * 发送超时
      */
     private long sendTimeout = 2000L;
-
     /**
      * 连接重试次数
      */
     private int retryTimes = 3;
-
-
-
     /***
      * 连接超时时间
      */
     private long connectTimeout;
-
-
     /***
      * 心跳间隔时间
      */
-    private long heatbeatInterval = 100000;
+    private long heartbeatInterval = 100000;
 
+    public String getAccessKeyId() {
+        return accessKeyId;
+    }
 
+    public void setAccessKeyId(String accessKeyId) {
+        this.accessKeyId = accessKeyId;
+    }
 
+    public String getAccessKeySecret() {
+        return accessKeySecret;
+    }
+
+    public void setAccessKeySecret(String accessKeySecret) {
+        this.accessKeySecret = accessKeySecret;
+    }
 
     public int getRetryTimes() {
         return retryTimes;
@@ -124,11 +123,11 @@ public class ClientConfig {
         this.connectTimeout = connectTimeout;
     }
 
-    public long getHeatbeatInterval() {
-        return heatbeatInterval;
+    public long getHeartbeatInterval() {
+        return heartbeatInterval;
     }
 
-    public void setHeatbeatInterval(long heatbeatInterval) {
-        this.heatbeatInterval = heatbeatInterval;
+    public void setHeartbeatInterval(long heartbeatInterval) {
+        this.heartbeatInterval = heartbeatInterval;
     }
 }

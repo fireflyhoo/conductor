@@ -128,7 +128,7 @@ public class NettyClient extends AbstractClient implements MessageChannel {
      */
     private void startHeatbeatTimer() {
         stopHeartbeatTimer();
-        long heartbeat = config.getHeatbeatInterval();
+        long heartbeat = config.getHeartbeatInterval();
         heartbeatTimer = scheduled.scheduleWithFixedDelay(new HeartBeatTask(),
                 heartbeat, heartbeat, TimeUnit.MILLISECONDS);
     }
