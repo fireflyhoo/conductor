@@ -5,7 +5,7 @@ import cn.yayatao.middleware.conductor.client.network.MessageChannel;
 import cn.yayatao.middleware.conductor.client.network.MessageChannelHandler;
 import cn.yayatao.middleware.conductor.client.network.netty.NettyClient;
 import cn.yayatao.middleware.conductor.model.URL;
-import cn.yayatao.middleware.conductor.protobuf.MessagePacketModel;
+import cn.yayatao.middleware.conductor.protobuf.MessageModel;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -34,7 +34,7 @@ public class NettyClientTest {
             }
         });
 
-        nettyClient.send(MessagePacketModel.MessagePacket.newBuilder().setId("66666").setData("heheheh").setType(1));
+        nettyClient.send(MessageModel.MessagePacket.newBuilder().setId("66666").setData("heheheh").setType(1));
         System.in.read();
         System.in.read();
 

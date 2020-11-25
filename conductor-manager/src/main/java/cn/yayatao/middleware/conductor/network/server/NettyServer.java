@@ -4,7 +4,7 @@ import cn.yayatao.middleware.conductor.client.network.MessageChannel;
 import cn.yayatao.middleware.conductor.client.network.MessageChannelHandler;
 import cn.yayatao.middleware.conductor.client.network.netty.NetworkSettings;
 import cn.yayatao.middleware.conductor.model.URL;
-import cn.yayatao.middleware.conductor.protobuf.MessagePacketModel;
+import cn.yayatao.middleware.conductor.protobuf.MessageModel;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.channel.*;
@@ -70,7 +70,7 @@ public class NettyServer extends AbstractServer {
                         ch.pipeline().addLast(new IdleStateHandler(NetworkSettings.READ_IDLE_TIME, NetworkSettings.WRITE_IDLE_TIME,
                                 NetworkSettings.ALL_IDLE_TIME, NetworkSettings.IDLE_TIME_UNIT))
                                 .addLast(new ProtobufVarint32FrameDecoder())
-                                .addLast(new ProtobufDecoder(MessagePacketModel.MessagePacket.getDefaultInstance()))
+                                .addLast(new ProtobufDecoder(MessageModel.MessagePacket.getDefaultInstance()))
                                 .addLast(new ProtobufVarint32LengthFieldPrepender())
                                 .addLast(new ProtobufEncoder())
                                 .addLast(nettyServerHandler);

@@ -30,7 +30,7 @@ public class TaskTopic {
 
 
     /**
-     * 重试时间
+     * 重试次数
      */
     private  int retry;
 

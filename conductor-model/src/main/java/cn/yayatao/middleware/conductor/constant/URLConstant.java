@@ -1,6 +1,6 @@
 package cn.yayatao.middleware.conductor.constant;
 
-public class URLConstant {
+public final class URLConstant {
 
-    public final static String URL_SERVER_PROTOCOL = "conductor";
+    public static final String URL_SERVER_PROTOCOL = "conductor";
 }

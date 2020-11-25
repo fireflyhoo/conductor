@@ -4,7 +4,7 @@ import cn.yayatao.middleware.conductor.client.exception.NetworkException;
 import cn.yayatao.middleware.conductor.client.network.MessageChannel;
 import cn.yayatao.middleware.conductor.client.network.MessageChannelHandler;
 import cn.yayatao.middleware.conductor.network.server.NettyServer;
-import cn.yayatao.middleware.conductor.protobuf.MessagePacketModel;
+import cn.yayatao.middleware.conductor.protobuf.MessageModel;
 
 import java.net.InetSocketAddress;
 
@@ -25,7 +25,7 @@ public class NettyServerTest {
             @Override
             public void received(MessageChannel channel, Object message) throws NetworkException {
                 System.out.println("收到消息 : " +channel +  message );
-                channel.send(MessagePacketModel.MessagePacket.newBuilder().setType(1).setData("你妹吖"));
+                channel.send(MessageModel.MessagePacket.newBuilder().setType(1).setData("你妹吖"));
             }
 
             @Override
