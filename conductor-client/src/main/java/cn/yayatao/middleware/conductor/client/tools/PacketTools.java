@@ -1,7 +1,9 @@
 package cn.yayatao.middleware.conductor.client.tools;
 
 import cn.yayatao.middleware.conductor.client.utils.JSONTools;
+import cn.yayatao.middleware.conductor.packet.Packet;
 import cn.yayatao.middleware.conductor.packet.client.Authentication;
+import cn.yayatao.middleware.conductor.packet.client.RegisterTopic;
 import cn.yayatao.middleware.conductor.protobuf.MessageModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +32,21 @@ public class PacketTools {
         auth.setRandomSalt(UUID.randomUUID().toString());
         auth.setTime(System.currentTimeMillis());
         auth.setSignature(structure(accessKeyId, accessKeySecret, auth.getRandomSalt(), auth.getTime()));
-        return MessageModel.MessagePacket.newBuilder().setId(accessKeyId).setType(auth.getType()).setData(JSONTools.toJSON(auth)).build();
+        return MessageModel.MessagePacket.newBuilder().setId(accessKeyId)
+                .setType(auth.getType()).setData(JSONTools.toJSON(auth)).build();
+    }
+
+
+    /***
+     * 构建参数
+     * @param accessKeyId 客户端连接id
+     * @param packet 数据包
+     * @return
+     */
+    public static Object build(String accessKeyId, Packet packet) {
+        MessageModel.MessagePacket.newBuilder().setId(accessKeyId)
+                .setType(packet.getType()).setData(JSONTools.toJSON(packet)).build();
+        return null;
     }
 
 
@@ -58,8 +74,12 @@ public class PacketTools {
             byte[] bits = md.digest();
             for (int bit : bits) {
                 int a = bit;
-                if (a < 0) a += 256;
-                if (a < 16) buf.append("0");
+                if (a < 0) {
+                    a += 256;
+                }
+                if (a < 16) {
+                    buf.append("0");
+                }
                 buf.append(Integer.toHexString(a));
             }
             return buf.toString();
@@ -68,4 +88,7 @@ public class PacketTools {
         }
         return null;
     }
+
+
+
 }
