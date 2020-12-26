@@ -17,7 +17,7 @@ public class AuthenticationResult implements Packet {
     /***
      * 会话令牌
      */
-    private String  jwt;
+    private String jwt;
 
 
     /***
@@ -28,6 +28,20 @@ public class AuthenticationResult implements Packet {
 
     private int type = Type.AUTHENTICATION_RESULT.getValue();
 
+
+    /***
+     * 认证失败原因
+     */
+    private String message;
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     @Override
     public int getType() {
         return type;
@@ -35,5 +49,29 @@ public class AuthenticationResult implements Packet {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    public boolean isPass() {
+        return pass;
+    }
+
+    public void setPass(boolean pass) {
+        this.pass = pass;
+    }
+
+    public String getJwt() {
+        return jwt;
+    }
+
+    public void setJwt(String jwt) {
+        this.jwt = jwt;
+    }
+
+    public URL getMasterUrl() {
+        return masterUrl;
+    }
+
+    public void setMasterUrl(URL masterUrl) {
+        this.masterUrl = masterUrl;
     }
 }

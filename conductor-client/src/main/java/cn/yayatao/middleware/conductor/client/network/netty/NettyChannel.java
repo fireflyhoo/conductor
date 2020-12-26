@@ -12,6 +12,7 @@ import java.net.InetSocketAddress;
 
 /***
  * 连接管道
+ * @author fireflyhoo
  */
 public class NettyChannel implements MessageChannel {
 
@@ -24,6 +25,7 @@ public class NettyChannel implements MessageChannel {
     private long timeout = 2000L;
 
     private volatile boolean closed = false;
+    private volatile long lastActivityTime;
 
     public NettyChannel(Channel channel, URL url, MessageChannelHandler channelHandler) {
         this.channel = channel;
@@ -44,6 +46,16 @@ public class NettyChannel implements MessageChannel {
     @Override
     public InetSocketAddress getRemoteAddress() {
         return (InetSocketAddress) channel.remoteAddress();
+    }
+
+    @Override
+    public long getLastActivityTime() {
+        return this.lastActivityTime;
+    }
+
+    @Override
+    public void setLastActivityTime(long lastActivityTime) {
+        this.lastActivityTime = lastActivityTime;
     }
 
     @Override

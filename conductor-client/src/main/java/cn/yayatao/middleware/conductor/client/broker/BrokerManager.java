@@ -6,7 +6,14 @@ import cn.yayatao.middleware.conductor.client.network.MessageChannel;
 import cn.yayatao.middleware.conductor.client.network.MessageChannelHandler;
 import cn.yayatao.middleware.conductor.client.network.netty.NettyClient;
 import cn.yayatao.middleware.conductor.client.tools.PacketTools;
+import cn.yayatao.middleware.conductor.client.utils.JSONTools;
+import cn.yayatao.middleware.conductor.exception.ConductorRuntimeException;
 import cn.yayatao.middleware.conductor.model.URL;
+import cn.yayatao.middleware.conductor.packet.Packet;
+import cn.yayatao.middleware.conductor.packet.base.Ping;
+import cn.yayatao.middleware.conductor.packet.base.Pong;
+import cn.yayatao.middleware.conductor.packet.server.AuthenticationResult;
+import cn.yayatao.middleware.conductor.protobuf.MessageModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -15,9 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 /****
  * 管理和调度broker的连接
+ * @author fireflyhoo
  */
 public class BrokerManager {
 
@@ -33,33 +43,37 @@ public class BrokerManager {
      *
      */
     private final Map<URL, MessageChannel> urlMessageChannelMap = new ConcurrentHashMap<>();
-
-
     /***
      *
      */
     private volatile MessageChannel brokerMaster;
-
-
+    private CountDownLatch masterBrokerVisibled = new CountDownLatch(1);
     private final MessageChannelHandler channelHandler = new MessageChannelHandler() {
         @Override
         public void connected(MessageChannel channel) throws NetworkException {
-
+            URL url = channel.getURL();
+            MessageChannel _channel = urlMessageChannelMap.get(url);
+            if (_channel != channel) {
+                urlMessageChannelMap.put(channel.getURL(), _channel);
+            }
         }
 
         @Override
         public void disconnected(MessageChannel channel) throws NetworkException {
-
+            urlMessageChannelMap.remove(channel.getURL());
         }
 
         @Override
         public void received(MessageChannel channel, Object message) throws NetworkException {
-
+            if (message instanceof MessageModel.MessagePacket) {
+                Packet packet = PacketTools.analysis((MessageModel.MessagePacket) message);
+                doHandleServerResponse(channel, packet);
+            }
         }
 
         @Override
         public void caught(MessageChannel channel, Throwable throwable) {
-
+            urlMessageChannelMap.remove(channel.getURL());
         }
     };
 
@@ -67,6 +81,59 @@ public class BrokerManager {
         this.config = config;
     }
 
+    /***
+     * 处理服务响应
+     * @param channel 消息管道
+     * @param packet 数据包
+     */
+    private void doHandleServerResponse(MessageChannel channel, Packet packet) {
+        URL url = channel.getURL();
+        MessageChannel _channel = urlMessageChannelMap.get(url);
+        if (_channel != channel) {
+            urlMessageChannelMap.put(url, channel);
+        }
+        channel.setLastActivityTime(System.currentTimeMillis());
+        if (packet instanceof Pong) {
+            // ignore
+            return;
+        }
+        if (packet instanceof Ping) {
+            try {
+                channel.send(PacketTools.build(config.getAccessKeyId(), new Pong()));
+            } catch (NetworkException e) {
+                LOGGER.warn("回复心跳出现异常", e);
+            }
+            return;
+        }
+        if (packet instanceof AuthenticationResult) {
+            AuthenticationResult authenticationResult = (AuthenticationResult) packet;
+            doHandleAuthenticationResult(channel, authenticationResult);
+        }
+
+    }
+
+
+    /***
+     * 处理认证响应成功的代码
+     * @param channel
+     * @param authenticationResult
+     */
+    private void doHandleAuthenticationResult(MessageChannel channel, AuthenticationResult authenticationResult) {
+        if (authenticationResult.isPass()) {
+            URL masterURL = authenticationResult.getMasterUrl();
+            if (masterURL != null && masterURL.equals(channel.getURL())) {
+                LOGGER.info("broker[{}] think current master is: {} ", channel.getURL(), masterURL);
+                //当前链接为主节点
+                setBrokerMaster(channel);
+                masterBrokerVisibled.countDown();
+            } else {
+                LOGGER.info("broker[{}] can't think current master broker  survival", channel.getURL());
+            }
+        } else {
+            LOGGER.error("auth broker error : {}", JSONTools.toJSON(authenticationResult));
+            throw new ConductorRuntimeException("the broker cannot auth");
+        }
+    }
 
     public void addBrokers(List<URL> urls) {
         currentBrokers.addAll(urls);
@@ -78,11 +145,25 @@ public class BrokerManager {
             try {
                 NettyClient client = new NettyClient(url, channelHandler);
                 urlMessageChannelMap.put(url, client);
-                client.send(PacketTools.auth(config.getAccessKeyId(),config.getAccessKeySecret()));
+                client.send(PacketTools.auth(config.getAccessKeyId(), config.getAccessKeySecret()));
             } catch (NetworkException e) {
                 LOGGER.error("ask master to broker:{} exception", url, e);
             }
         });
+    }
+
+    /***
+     * 等待主节点回应
+     */
+    public void waitMasterBrokerReply() {
+        try {
+            boolean timeOut = !masterBrokerVisibled.await(3, TimeUnit.SECONDS);
+            if (timeOut) {
+                throw new ConductorRuntimeException("can`t connect to  master broker");
+            }
+        } catch (InterruptedException e) {
+            LOGGER.error("线程等待被打断", e);
+        }
     }
 
 

@@ -2,6 +2,10 @@ package cn.yayatao.middleware.conductor.packet;
 
 import java.io.Serializable;
 
+/***
+ * 数据包
+ * @author fireflyhoo
+ */
 public interface Packet extends Serializable {
     /****
      * 获取类型
@@ -23,9 +27,8 @@ public interface Packet extends Serializable {
         EXECUTE_TASK(7),
         AUTHENTICATION(8),
         AUTHENTICATION_RESULT(9),
-        ERROR_RESULT(10),
-        MASTER_CHANGED(11),
-        ACK_ASK_MASTER(12);
+        ERR_RESULT(10),
+        MASTER_CHANGED(11);
 
 
         /***
@@ -35,6 +38,15 @@ public interface Packet extends Serializable {
 
         Type(int value) {
             this.value = value;
+        }
+
+        public static Type valueOf(int type) {
+            for (Type value : Type.values()) {
+                if (value.value == type) {
+                    return value;
+                }
+            }
+            throw new IllegalArgumentException("枚举类型无法解析code:" + type);
         }
 
 

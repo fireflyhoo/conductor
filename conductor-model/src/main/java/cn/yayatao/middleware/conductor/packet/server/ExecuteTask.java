@@ -6,11 +6,12 @@ import cn.yayatao.middleware.conductor.packet.Packet;
 /***
  * 执行任务命令
  */
-public class ExecuteTask {
+public class ExecuteTask  implements Packet{
     private int type = Packet.Type.EXECUTE_TASK.getValue();
 
     private Task task;
 
+    @Override
     public int getType() {
         return type;
     }

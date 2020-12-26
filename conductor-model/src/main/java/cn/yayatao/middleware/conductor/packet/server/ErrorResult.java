@@ -9,7 +9,7 @@ import cn.yayatao.middleware.conductor.packet.Packet;
  */
 public class ErrorResult implements Packet {
 
-    private int type = Packet.Type.ERROR_RESULT.getValue();
+    private int type = Packet.Type.ERR_RESULT.getValue();
 
     /***
      * 错误码

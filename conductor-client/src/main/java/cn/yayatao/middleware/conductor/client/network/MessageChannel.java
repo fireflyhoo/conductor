@@ -33,6 +33,20 @@ public interface MessageChannel {
 
 
     /***
+     * 设置最后活动时间
+     * @param lastActivityTime 最后活动时间戳
+     */
+    void setLastActivityTime(long lastActivityTime);
+
+
+    /***
+     *  获取最后活动时间
+     * @return
+     */
+    long getLastActivityTime();
+
+
+    /***
      * 发送消息
      * @param message
      * @throws NetworkException

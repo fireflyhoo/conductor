@@ -5,7 +5,9 @@ import cn.yayatao.middleware.conductor.client.exception.NetworkException;
 import cn.yayatao.middleware.conductor.client.network.AbstractClient;
 import cn.yayatao.middleware.conductor.client.network.MessageChannel;
 import cn.yayatao.middleware.conductor.client.network.MessageChannelHandler;
+import cn.yayatao.middleware.conductor.client.tools.PacketTools;
 import cn.yayatao.middleware.conductor.model.URL;
+import cn.yayatao.middleware.conductor.packet.base.Ping;
 import cn.yayatao.middleware.conductor.protobuf.MessageModel;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.PooledByteBufAllocator;
@@ -53,6 +55,22 @@ public class NettyClient extends AbstractClient implements MessageChannel {
     private ScheduledFuture<?> heartbeatTimer;
 
 
+    @Override
+    public long getLastActivityTime() {
+        return lastActivityTime;
+    }
+
+    @Override
+    public void setLastActivityTime(long lastActivityTime) {
+        this.lastActivityTime = lastActivityTime;
+    }
+
+    /***
+     * 最后活动时间
+     */
+    private volatile long lastActivityTime;
+
+
     public NettyClient(URL url, MessageChannelHandler channelHandler) throws NetworkException {
         super(url, channelHandler);
     }
@@ -87,7 +105,7 @@ public class NettyClient extends AbstractClient implements MessageChannel {
     protected void doConnect() throws NetworkException {
         long start = System.currentTimeMillis();
         ChannelFuture channelFuture = null;
-        int retrys = config.getRetryTimes();
+        int retryTimes = config.getRetryTimes();
         InetSocketAddress brokerAddress = getRemoteAddress();
         do {
             //循环连接测试
@@ -96,14 +114,13 @@ public class NettyClient extends AbstractClient implements MessageChannel {
                     @Override
                     public void operationComplete(ChannelFuture channelFuture) throws Exception {
                         if (channelFuture.isSuccess()) {
-                            //心跳
-                            //获取当前的主broker
+                          LOGGER.info("connect success broker: {}",channelFuture.channel().remoteAddress());
                         }
                     }
                 });
                 channelFuture.awaitUninterruptibly(3000, TimeUnit.MILLISECONDS);
             } catch (Throwable e) {
-                e.printStackTrace();
+                LOGGER.warn("connect throwable",e);
                 // IGNORE
             }
             if (channelFuture != null && channelFuture.isSuccess()) {
@@ -112,10 +129,10 @@ public class NettyClient extends AbstractClient implements MessageChannel {
                 startHeatbeatTimer();
                 return;
             }
-            retrys--;
-        } while ((channelFuture == null || !channelFuture.channel().isActive()) && retrys > 0);
+            retryTimes--;
+        } while ((channelFuture == null || !channelFuture.channel().isActive()) && retryTimes > 0);
 
-        if (retrys <= 0 && (channelFuture == null || !channelFuture.isSuccess())) {
+        if (retryTimes <= 0 && (channelFuture == null || !channelFuture.isSuccess())) {
             throw new NetworkException("client(url: " + getURL() + ") failed to connect to server "
                     + getRemoteAddress() + " client-side timeout "
                     + config.getConnectTimeout() + "ms (elapsed: " + (System.currentTimeMillis() - start) + "ms) from netty client " + getLocalAddress());
@@ -195,7 +212,7 @@ public class NettyClient extends AbstractClient implements MessageChannel {
         public void run() {
             MessageChannel messageChannel = NettyChannels.getOrAddChannel(channel, url, NettyClient.this);
             try {
-                messageChannel.send(MessageModel.MessagePacket.newBuilder().setData("PING").setType(1).build());
+                messageChannel.send(PacketTools.build(config.getAccessKeyId(), new Ping()));
                 LOGGER.info("ping");
             } catch (NetworkException e) {
                 LOGGER.warn("心跳失败", e);

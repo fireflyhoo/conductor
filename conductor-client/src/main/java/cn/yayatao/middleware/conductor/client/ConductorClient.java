@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 
 /**
  * 调度客户端
+ * @author fireflyhoo
  */
 public class ConductorClient {
 
@@ -35,7 +36,7 @@ public class ConductorClient {
     private final BrokerManager brokerManager;
     private final TaskExecutorManager taskExecutorManager;
     private AtomicBoolean running = new AtomicBoolean();
-    private CountDownLatch masterBrokerVisibled = new CountDownLatch(1);
+
 
     public ConductorClient(ClientConfig config) {
         this.config = config;
@@ -49,23 +50,21 @@ public class ConductorClient {
             LOGGER.warn("client has started");
             return;
         }
-        final String serverhost = config.getServerHosts();
-        if (Strings.isNullOrEmpty(serverhost)) {
+        final String serverHost = config.getServerHosts();
+        if (Strings.isNullOrEmpty(serverHost)) {
             LOGGER.warn("client not assign server host");
             return;
         }
-        List<URL> brokers = Splitter.on(",").omitEmptyStrings().trimResults().splitToList(serverhost).stream().map(o -> {
+        List<URL> brokers = Splitter.on(",").omitEmptyStrings()
+                .trimResults().splitToList(serverHost).stream().map(o -> {
             return URL.valueOf(URLConstant.URL_SERVER_PROTOCOL + "://" + o);
         }).collect(Collectors.toList());
 
         //认证通过后会返回主节点
         brokerManager.authBrokers(brokers);
         brokerManager.addBrokers(brokers);
-        waitMasterBrokerReply();
+        brokerManager.waitMasterBrokerReply();
         subscribeTopicForMaster();
-
-        char[] arrs = "".toCharArray();
-
     }
 
 
@@ -77,25 +76,13 @@ public class ConductorClient {
         registerTopic.setTaskTopic(taskExecutorManager.getAllSubscribeTopics());
         registerTopic.setClientGroup(config.getClientGroup());
         try {
-            brokerManager.getBrokerMaster().send(PacketTools.build(config.getAccessKeyId(), registerTopic));
+            brokerManager.getBrokerMaster().send(
+                    PacketTools.build(config.getAccessKeyId(), registerTopic));
         } catch (NetworkException e) {
             LOGGER.error("订阅topic出现错误");
         }
     }
 
-    /***
-     * 等待主节点回应
-     */
-    private void waitMasterBrokerReply() {
-        try {
-            boolean timeOut = !masterBrokerVisibled.await(3, TimeUnit.SECONDS);
-            if (timeOut) {
-                throw new ConductorRuntimeException("can`t connect to  master broker");
-            }
-        } catch (InterruptedException e) {
-            LOGGER.error("线程等待被打断", e);
-        }
-    }
 
 
     /**

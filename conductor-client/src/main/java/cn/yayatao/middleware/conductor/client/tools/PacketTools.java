@@ -2,8 +2,13 @@ package cn.yayatao.middleware.conductor.client.tools;
 
 import cn.yayatao.middleware.conductor.client.utils.JSONTools;
 import cn.yayatao.middleware.conductor.packet.Packet;
+import cn.yayatao.middleware.conductor.packet.base.Ping;
+import cn.yayatao.middleware.conductor.packet.base.Pong;
 import cn.yayatao.middleware.conductor.packet.client.Authentication;
-import cn.yayatao.middleware.conductor.packet.client.RegisterTopic;
+import cn.yayatao.middleware.conductor.packet.server.AuthenticationResult;
+import cn.yayatao.middleware.conductor.packet.server.ErrorResult;
+import cn.yayatao.middleware.conductor.packet.server.ExecuteTask;
+import cn.yayatao.middleware.conductor.packet.server.MasterChanged;
 import cn.yayatao.middleware.conductor.protobuf.MessageModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +55,33 @@ public class PacketTools {
     }
 
 
+    /***
+     * 解析数据包
+     * @param message
+     * @return
+     */
+    public static Packet analysis(MessageModel.MessagePacket message) {
+        Packet.Type type = Packet.Type.valueOf(message.getType());
+        switch (type) {
+            //认证结果
+            case AUTHENTICATION_RESULT:
+                return JSONTools.parseObject(message.getData(), AuthenticationResult.class);
+            case PONG:
+                return JSONTools.parseObject(message.getData(), Pong.class);
+            case PING:
+                return JSONTools.parseObject(message.getData(), Ping.class);
+            case ERR_RESULT:
+                return JSONTools.parseObject(message.getData(), ErrorResult.class);
+            case EXECUTE_TASK:
+                return JSONTools.parseObject(message.getData(), ExecuteTask.class);
+            case MASTER_CHANGED:
+                return JSONTools.parseObject(message.getData(), MasterChanged.class);
+            default:
+                return null;
+        }
+    }
+
+
     /**
      * 构建签名
      *
@@ -88,7 +120,6 @@ public class PacketTools {
         }
         return null;
     }
-
 
 
 }
