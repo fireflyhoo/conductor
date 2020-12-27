@@ -3,6 +3,7 @@ package cn.yayatao.middleware.conductor.client.consumer;
 import cn.yayatao.middleware.conductor.client.config.ClientConfig;
 import cn.yayatao.middleware.conductor.client.consumer.annotation.ConductorExecutor;
 import cn.yayatao.middleware.conductor.client.network.MessageChannel;
+import cn.yayatao.middleware.conductor.client.thread.NamedThreadFactory;
 import cn.yayatao.middleware.conductor.exception.ConductorRuntimeException;
 import cn.yayatao.middleware.conductor.packet.server.ExecuteTask;
 import org.reflections.Reflections;
@@ -13,7 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 
 /**
  * 延时调度任务处理器管理器
@@ -25,7 +26,14 @@ public class TaskExecutorManager {
 
     private final ClientConfig config;
 
-    private Map<String/**topic**/,TaskExecutor>  taskExecutors = new ConcurrentHashMap<>();
+    private Executor executor = new ThreadPoolExecutor(5, 10, 50
+            , TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(10)
+            , new NamedThreadFactory("Conductor-ExecuteTask-Work"),new ThreadPoolExecutor.CallerRunsPolicy());
+
+    /***
+     * (topic -> TaskExecutor)
+     */
+    private Map<String, TaskExecutor> taskExecutors = new ConcurrentHashMap<>();
 
     public TaskExecutorManager(ClientConfig config) {
         this.config = config;
@@ -41,12 +49,12 @@ public class TaskExecutorManager {
         Set<Class<?>> clazzs = reflections.getTypesAnnotatedWith(ConductorExecutor.class);
         clazzs.stream().filter((clazz) -> {
             return TaskExecutor.class.isAssignableFrom(clazz);
-        }).forEach((clz ->{
+        }).forEach((clz -> {
             ConductorExecutor conductorExecutor = clz.getAnnotation(ConductorExecutor.class);
             try {
                 taskExecutors.put(conductorExecutor.value(), (TaskExecutor) clz.newInstance());
             } catch (Exception e) {
-                LOGGER.error("初始化类失败",e);
+                LOGGER.error("初始化类失败", e);
                 throw new ConductorRuntimeException(e);
             }
         }));
