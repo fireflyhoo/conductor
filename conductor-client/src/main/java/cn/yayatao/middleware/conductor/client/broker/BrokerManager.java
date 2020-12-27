@@ -1,6 +1,7 @@
 package cn.yayatao.middleware.conductor.client.broker;
 
 import cn.yayatao.middleware.conductor.client.config.ClientConfig;
+import cn.yayatao.middleware.conductor.client.consumer.TaskExecutorManager;
 import cn.yayatao.middleware.conductor.client.exception.NetworkException;
 import cn.yayatao.middleware.conductor.client.network.MessageChannel;
 import cn.yayatao.middleware.conductor.client.network.MessageChannelHandler;
@@ -13,6 +14,9 @@ import cn.yayatao.middleware.conductor.packet.Packet;
 import cn.yayatao.middleware.conductor.packet.base.Ping;
 import cn.yayatao.middleware.conductor.packet.base.Pong;
 import cn.yayatao.middleware.conductor.packet.server.AuthenticationResult;
+import cn.yayatao.middleware.conductor.packet.server.ErrorResult;
+import cn.yayatao.middleware.conductor.packet.server.ExecuteTask;
+import cn.yayatao.middleware.conductor.packet.server.MasterChanged;
 import cn.yayatao.middleware.conductor.protobuf.MessageModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +37,9 @@ public class BrokerManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BrokerManager.class);
     private final ClientConfig config;
+
+    private final TaskExecutorManager taskExecutorManager;
+
     /**
      * 存储当前活着的broker
      */
@@ -77,8 +84,9 @@ public class BrokerManager {
         }
     };
 
-    public BrokerManager(ClientConfig config) {
+    public BrokerManager(ClientConfig config,TaskExecutorManager taskExecutorManager) {
         this.config = config;
+        this.taskExecutorManager = taskExecutorManager;
     }
 
     /***
@@ -97,6 +105,7 @@ public class BrokerManager {
             // ignore
             return;
         }
+        //心跳
         if (packet instanceof Ping) {
             try {
                 channel.send(PacketTools.build(config.getAccessKeyId(), new Pong()));
@@ -105,11 +114,68 @@ public class BrokerManager {
             }
             return;
         }
+
+        //认证响应
         if (packet instanceof AuthenticationResult) {
             AuthenticationResult authenticationResult = (AuthenticationResult) packet;
             doHandleAuthenticationResult(channel, authenticationResult);
+            return;
         }
 
+        //主节点转移
+        if (packet instanceof MasterChanged){
+            MasterChanged masterChanged = (MasterChanged) packet;
+            doHandleMasterChanged(channel,masterChanged);
+            return;
+        }
+
+        //执行任务
+        if (packet instanceof ExecuteTask){
+            ExecuteTask executeTask = (ExecuteTask) packet;
+            doHandleExecuteTask(channel,executeTask);
+            return;
+        }
+
+        if (packet instanceof ErrorResult){
+            ErrorResult errorResult = (ErrorResult) packet;
+            doHandleErrorResult(channel,errorResult);
+        }
+
+
+
+    }
+
+
+    /****
+     * 错误信息
+     * @param channel
+     * @param errorResult
+     */
+    private void doHandleErrorResult(MessageChannel channel, ErrorResult errorResult) {
+        LOGGER.error("服务出错信息:{}" , errorResult.getMsg());
+    }
+
+    /***
+     * 执行错误信息
+     * @param channel
+     * @param executeTask
+     */
+    private void doHandleExecuteTask(MessageChannel channel, ExecuteTask executeTask) {
+        taskExecutorManager.executeTask(channel,executeTask);
+    }
+
+
+    /***
+     * 处理主节点改变的事件
+     * @param channel
+     * @param masterChanged
+     */
+    private void doHandleMasterChanged(MessageChannel channel, MasterChanged masterChanged) {
+        URL masterURL = masterChanged.getMasterUrl();
+        if(masterURL != null && masterURL.equals(channel.getURL())){
+            LOGGER.info("now crurrent broker[{}] think change current master to : {} ", channel.getURL(), masterURL);
+            setBrokerMaster(channel);
+        }
     }
 
 
