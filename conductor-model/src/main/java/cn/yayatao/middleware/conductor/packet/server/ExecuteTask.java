@@ -19,4 +19,12 @@ public class ExecuteTask  implements Packet{
     public void setType(int type) {
         this.type = type;
     }
+
+    public Task getTask() {
+        return task;
+    }
+
+    public void setTask(Task task) {
+        this.task = task;
+    }
 }

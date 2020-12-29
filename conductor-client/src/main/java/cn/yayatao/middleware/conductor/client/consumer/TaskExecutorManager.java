@@ -2,9 +2,14 @@ package cn.yayatao.middleware.conductor.client.consumer;
 
 import cn.yayatao.middleware.conductor.client.config.ClientConfig;
 import cn.yayatao.middleware.conductor.client.consumer.annotation.ConductorExecutor;
+import cn.yayatao.middleware.conductor.client.exception.NetworkException;
 import cn.yayatao.middleware.conductor.client.network.MessageChannel;
 import cn.yayatao.middleware.conductor.client.thread.NamedThreadFactory;
+import cn.yayatao.middleware.conductor.client.tools.PacketTools;
+import cn.yayatao.middleware.conductor.client.utils.JSONTools;
 import cn.yayatao.middleware.conductor.exception.ConductorRuntimeException;
+import cn.yayatao.middleware.conductor.model.Task;
+import cn.yayatao.middleware.conductor.packet.client.AckExecuteTask;
 import cn.yayatao.middleware.conductor.packet.server.ExecuteTask;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
@@ -28,7 +33,7 @@ public class TaskExecutorManager {
 
     private Executor executor = new ThreadPoolExecutor(5, 10, 50
             , TimeUnit.SECONDS, new ArrayBlockingQueue<Runnable>(10)
-            , new NamedThreadFactory("Conductor-ExecuteTask-Work"),new ThreadPoolExecutor.CallerRunsPolicy());
+            , new NamedThreadFactory("Conductor-ExecuteTask-Work"), new ThreadPoolExecutor.CallerRunsPolicy());
 
     /***
      * (topic -> TaskExecutor)
@@ -73,6 +78,42 @@ public class TaskExecutorManager {
      * @param executeTask
      */
     public void executeTask(MessageChannel channel, ExecuteTask executeTask) {
-
+        executor.execute(() -> {
+            Task task = executeTask.getTask();
+            String topic = task.getTaskTopic();
+            TaskExecutor taskExecutor = taskExecutors.get(topic);
+            AckExecuteTask ackExecuteTask = new AckExecuteTask();
+            ackExecuteTask.setTaskTopic(topic);
+            ackExecuteTask.setTaskKey(task.getTaskKey());
+            if (taskExecutor == null) {
+                LOGGER.warn("the topic [{}] not fund TaskExecutor", topic);
+                ackExecuteTask.setSucceed(false);
+                ackExecuteTask.setMessage("对应的应用没有本topic的处理类");
+                try {
+                    channel.send(PacketTools.build(config.getAccessKeyId(), ackExecuteTask));
+                } catch (NetworkException ex) {
+                    LOGGER.error("send AckExecuteTask error:", ex);
+                }
+                return;
+            }
+            try {
+                taskExecutor.execute(task);
+                ackExecuteTask.setSucceed(true);
+                try {
+                    channel.send(PacketTools.build(config.getAccessKeyId(), ackExecuteTask));
+                } catch (NetworkException ex) {
+                    LOGGER.error("send AckExecuteTask error:", ex);
+                }
+            } catch (Throwable e) {
+                LOGGER.error("execute task {} has error:", JSONTools.toJSON(task), e);
+                ackExecuteTask.setSucceed(false);
+                ackExecuteTask.setMessage(e.getMessage());
+                try {
+                    channel.send(PacketTools.build(config.getAccessKeyId(), ackExecuteTask));
+                } catch (NetworkException ex) {
+                    LOGGER.error("send AckExecuteTask error:", ex);
+                }
+            }
+        });
     }
 }

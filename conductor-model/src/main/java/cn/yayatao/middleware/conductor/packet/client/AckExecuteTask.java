@@ -20,10 +20,17 @@ public class AckExecuteTask implements Packet {
      */
     private String taskKey;
 
+
     /***
      * 执行结果
      */
     private boolean succeed;
+
+
+    /***
+     * 消息信息
+     */
+    private String message;
 
     public String getTaskTopic() {
         return taskTopic;
@@ -57,4 +64,14 @@ public class AckExecuteTask implements Packet {
     public void setType(int type) {
         this.type = type;
     }
+
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
 }
