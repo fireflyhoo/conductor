@@ -80,6 +80,7 @@ public class TaskExecutorManager {
     public void executeTask(MessageChannel channel, ExecuteTask executeTask) {
         executor.execute(() -> {
             Task task = executeTask.getTask();
+            LOGGER.info("Received Task, topic:{}, taskKey: {}",task.getTaskTopic(),task.getTaskKey());
             String topic = task.getTaskTopic();
             TaskExecutor taskExecutor = taskExecutors.get(topic);
             AckExecuteTask ackExecuteTask = new AckExecuteTask();
