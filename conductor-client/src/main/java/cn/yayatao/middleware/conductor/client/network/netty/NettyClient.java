@@ -94,9 +94,11 @@ public class NettyClient extends AbstractClient implements MessageChannel {
                                 NetworkSettings.ALL_IDLE_TIME, NetworkSettings.IDLE_TIME_UNIT))
                         .addLast(new ProtobufVarint32FrameDecoder())
                         .addLast(new ProtobufDecoder(MessageModel.MessagePacket.getDefaultInstance()))
+                        .addLast(clientHandler)
                         .addLast(new ProtobufVarint32LengthFieldPrepender())
-                        .addLast(new ProtobufEncoder())
-                        .addLast(clientHandler);
+                        .addLast(new ProtobufEncoder());
+
+
             }
         });
     }

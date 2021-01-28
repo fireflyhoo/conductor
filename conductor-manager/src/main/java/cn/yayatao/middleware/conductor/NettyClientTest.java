@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 public class NettyClientTest {
     public static void main(String[] args) throws NetworkException, IOException {
-        NettyClient nettyClient = new NettyClient(new URL("conductor", "127.0.0.1", 8888, new HashMap<>()), new MessageChannelHandler() {
+        NettyClient nettyClient = new NettyClient(new URL("conductor", "127.0.0.1", 6666, new HashMap<>()), new MessageChannelHandler() {
             @Override
             public void connected(MessageChannel channel) throws NetworkException {
 
