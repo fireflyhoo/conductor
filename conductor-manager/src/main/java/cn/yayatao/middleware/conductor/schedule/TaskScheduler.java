@@ -8,6 +8,10 @@ import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ *  任务调度核心
+ * @author fireflyhoo
+ */
 public class TaskScheduler implements LifeCycle {
     private static final Logger LOGGER = LoggerFactory.getLogger(TaskScheduler.class);
 

@@ -1,4 +1,4 @@
-package cn.yayatao.middleware.conductor;
+package cn.yayatao.middleware.conductor.schedule;
 
 import cn.yayatao.middleware.conductor.election.ElectionNode;
 import cn.yayatao.middleware.conductor.election.ElectionNodeOptions;
@@ -78,7 +78,6 @@ public class BootsTest {
             }
             System.out.println(node.getNode().getLeaderId());
         }
-
 
     }
 }

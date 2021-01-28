@@ -50,7 +50,7 @@ public class TaskExecutorManager {
      * 初始化任务
      */
     private void initTaskExecutors() {
-        Reflections reflections = new Reflections();
+        Reflections reflections = new Reflections("cn");
         Set<Class<?>> clazzs = reflections.getTypesAnnotatedWith(ConductorExecutor.class);
         clazzs.stream().filter((clazz) -> {
             return TaskExecutor.class.isAssignableFrom(clazz);

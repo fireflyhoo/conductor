@@ -75,9 +75,10 @@ public class ConductorClient {
         registerTopic.setTaskTopic(taskExecutorManager.getAllSubscribeTopics());
         registerTopic.setClientGroup(config.getClientGroup());
         try {
-            brokerManager.getBrokerMaster().send(
-                    PacketTools.build(config.getAccessKeyId(), registerTopic));
-        } catch (NetworkException e) {
+//            brokerManager.getBrokerMaster().send(
+//                    PacketTools.build(config.getAccessKeyId(), registerTopic));
+            System.out.println("xx");
+        } catch (Exception e) {
             LOGGER.error("订阅topic出现错误");
         }
     }

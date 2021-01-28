@@ -21,5 +21,9 @@ public abstract class TimerTaskHandler implements  Runnable {
         return identity;
     }
 
+
+    /****
+     * 真正执行任务
+     */
     protected abstract void execute();
 }

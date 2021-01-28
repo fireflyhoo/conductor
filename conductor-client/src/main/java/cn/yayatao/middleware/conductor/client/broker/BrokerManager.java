@@ -225,7 +225,7 @@ public class BrokerManager {
         try {
             boolean timeOut = !masterBrokerVisibled.await(3, TimeUnit.SECONDS);
             if (timeOut) {
-                throw new ConductorRuntimeException("can`t connect to  master broker");
+              //  throw new ConductorRuntimeException("can`t connect to  master broker");
             }
         } catch (InterruptedException e) {
             LOGGER.error("线程等待被打断", e);

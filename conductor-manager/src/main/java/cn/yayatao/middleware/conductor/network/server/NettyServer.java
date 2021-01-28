@@ -21,6 +21,10 @@ import io.netty.util.concurrent.DefaultThreadFactory;
 import java.net.InetSocketAddress;
 import java.util.Map;
 
+/**
+ *  netty 实现的网络服务
+ * @author fireflyhoo
+ */
 public class NettyServer extends AbstractServer {
 
     /**
@@ -29,9 +33,9 @@ public class NettyServer extends AbstractServer {
     private static final int DEFAULT_IO_THREADS = Math.min(Runtime.getRuntime().availableProcessors() + 1, 32);
 
     /**
-     * 连接上的通道
+     * 连接上的通道   ip:port ,channel
      */
-    private Map<String, MessageChannel> channels; // ip:port ,channel
+    private Map<String, MessageChannel> channels;
 
     private ServerBootstrap bootstrap;
 
@@ -41,7 +45,9 @@ public class NettyServer extends AbstractServer {
     private EventLoopGroup bossGroup;
     private EventLoopGroup workerGroup;
 
-    //管道
+    /**
+     *   管道
+     */
     private Channel channel;
 
     public NettyServer(InetSocketAddress bindAddress, MessageChannelHandler channelHandler) {
@@ -50,9 +56,10 @@ public class NettyServer extends AbstractServer {
 
     /**
      * 监听本地端口
+     * @param bindAddress
      */
     @Override
-    protected void bind() {
+    protected void bind(InetSocketAddress bindAddress) {
         bootstrap = new ServerBootstrap();
         bossGroup = new NioEventLoopGroup(1, new DefaultThreadFactory("NettyServerBoss", false));
         workerGroup = new NioEventLoopGroup(DEFAULT_IO_THREADS, new DefaultThreadFactory("NettyServerWorker", false));
@@ -76,10 +83,14 @@ public class NettyServer extends AbstractServer {
                                 .addLast(nettyServerHandler);
                     }
                 });
-        ChannelFuture channelFuture = bootstrap.bind(6666);
-        System.out.println("6666");
+        ChannelFuture channelFuture = bootstrap.bind(bindAddress);
         channelFuture.syncUninterruptibly();
         channel = channelFuture.channel();
+    }
+
+    @Override
+    public void stop() {
+        this.channel.close();
     }
 
     private URL getURL() {

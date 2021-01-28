@@ -8,23 +8,24 @@ import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 
-public abstract class AbstractServer  implements MessageChannelHandler {
+public abstract class AbstractServer implements MessageChannelHandler {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AbstractServer.class);
-
-
-    //绑定地址
-    private InetSocketAddress bindAddress;
-    //服务器最大可接受连接数
-    private int accepts;
-    //空闲超时时间，单位：毫秒
-    private long idleTimeout; //600 seconds
-
+    protected final MessageChannelHandler channelHandler;
     protected volatile boolean closed = false;
     protected volatile boolean closing = false;
-
-
-    protected final MessageChannelHandler channelHandler;
+    /***
+     *     绑定地址
+     */
+    private final InetSocketAddress bindAddress;
+    /**
+     * 服务器最大可接受连接数
+     */
+    private final int accepts;
+    /***
+     * 空闲超时时间，单位：毫秒  600 seconds
+     */
+    private final long idleTimeout;
 
     public AbstractServer(InetSocketAddress bindAddress, MessageChannelHandler channelHandler) {
         this.bindAddress = bindAddress;
@@ -37,17 +38,20 @@ public abstract class AbstractServer  implements MessageChannelHandler {
     /**
      * 启动服务
      */
-    public void start(){
-        try{
-            bind();
-        }catch (Throwable throwable){
+    public void start() {
+        try {
+            bind(bindAddress);
+        } catch (Throwable throwable) {
             LOGGER.info("server bind {} excepiton", bindAddress, throwable);
         }
     }
 
 
-
-    protected abstract void bind();
+    /***
+     * 真实绑定网络
+     * @param bindAddress
+     */
+    protected abstract void bind(InetSocketAddress bindAddress);
 
 
     @Override
@@ -62,11 +66,13 @@ public abstract class AbstractServer  implements MessageChannelHandler {
 
     @Override
     public void received(MessageChannel channel, Object message) throws NetworkException {
-        this.channelHandler.received(channel,message);
+        this.channelHandler.received(channel, message);
     }
 
     @Override
     public void caught(MessageChannel channel, Throwable throwable) {
-        this.caught(channel,throwable);
+        LOGGER.warn("连接出现异常 {},", channel, throwable);
     }
+
+    public abstract void stop();
 }

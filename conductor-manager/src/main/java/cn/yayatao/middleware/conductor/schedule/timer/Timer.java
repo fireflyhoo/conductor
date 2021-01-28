@@ -112,7 +112,6 @@ public class Timer implements LifeCycle {
             startTimeInitialized.countDown();
             do {
                 Timer.this.execute();
-                System.out.println("execute");
             }while (workerState.get() == WORKER_STATE_STARTED);
         }
     }

@@ -49,9 +49,9 @@ public class PacketTools {
      * @return
      */
     public static Object build(String accessKeyId, Packet packet) {
-        MessageModel.MessagePacket.newBuilder().setId(accessKeyId)
+        return MessageModel.MessagePacket.newBuilder().setId(accessKeyId)
                 .setType(packet.getType()).setData(JSONTools.toJSON(packet)).build();
-        return null;
+
     }
 
 
