@@ -4,8 +4,10 @@ import cn.yayatao.middleware.conductor.packet.Packet;
 
 /****
  * 任务执行结果上报
+ * @author fireflyhoo
  */
-public class AckExecuteTask implements Packet {
+public class AckExecuteTask extends ClientBase implements Packet {
+
 
     private int type = Packet.Type.ACK_EXECUTE_TASK.getValue();
 

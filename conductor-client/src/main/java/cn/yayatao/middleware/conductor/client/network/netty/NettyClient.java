@@ -71,8 +71,8 @@ public class NettyClient extends AbstractClient implements MessageChannel {
     private volatile long lastActivityTime;
 
 
-    public NettyClient(URL url, MessageChannelHandler channelHandler) throws NetworkException {
-        super(url, channelHandler);
+    public NettyClient(URL url, MessageChannelHandler channelHandler,ClientConfig config) throws NetworkException {
+        super(url, channelHandler, config);
     }
 
     @Override
@@ -195,6 +195,11 @@ public class NettyClient extends AbstractClient implements MessageChannel {
     @Override
     public boolean isClosed() {
         return this.closed;
+    }
+
+    @Override
+    public void close() {
+        this.close(-1);
     }
 
     @Override

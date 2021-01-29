@@ -4,8 +4,9 @@ import cn.yayatao.middleware.conductor.packet.Packet;
 
 /***
  * 认证请求
+ * @author fireflyhoo
  */
-public class Authentication implements Packet {
+public class Authentication extends ClientBase implements Packet {
     /***
      * 访问客户端key
      */
@@ -66,5 +67,16 @@ public class Authentication implements Packet {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return "Authentication{" +
+                "accessKeyId='" + accessKeyId + '\'' +
+                ", randomSalt='" + randomSalt + '\'' +
+                ", signature='" + signature + '\'' +
+                ", time=" + time +
+                ", type=" + type +
+                '}';
     }
 }

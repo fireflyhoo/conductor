@@ -31,4 +31,12 @@ public class MasterChanged implements Packet {
     public void setMasterUrl(URL masterUrl) {
         this.masterUrl = masterUrl;
     }
+
+    @Override
+    public String toString() {
+        return "MasterChanged{" +
+                "type=" + type +
+                ", masterUrl=" + masterUrl +
+                '}';
+    }
 }

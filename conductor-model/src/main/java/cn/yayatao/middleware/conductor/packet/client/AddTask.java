@@ -5,8 +5,9 @@ import cn.yayatao.middleware.conductor.packet.Packet;
 
 /***
  * 添加延时任务
+ * @author fireflyhoo
  */
-public class AddTask implements Packet {
+public class AddTask extends ClientBase implements Packet {
     private int type = Type.ADD_TASK.getValue();
 
     //任务信息
@@ -27,6 +28,14 @@ public class AddTask implements Packet {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return "AddTask{" +
+                "type=" + type +
+                ", task=" + task +
+                '}';
     }
 }
 

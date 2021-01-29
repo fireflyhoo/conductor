@@ -140,9 +140,6 @@ public class BrokerManager {
             ErrorResult errorResult = (ErrorResult) packet;
             doHandleErrorResult(channel,errorResult);
         }
-
-
-
     }
 
 
@@ -209,7 +206,7 @@ public class BrokerManager {
     public void authBrokers(List<URL> brokers) {
         brokers.stream().forEach(url -> {
             try {
-                NettyClient client = new NettyClient(url, channelHandler);
+                NettyClient client = new NettyClient(url, channelHandler,config);
                 urlMessageChannelMap.put(url, client);
                 client.send(PacketTools.auth(config.getAccessKeyId(), config.getAccessKeySecret()));
             } catch (NetworkException e) {
@@ -225,7 +222,7 @@ public class BrokerManager {
         try {
             boolean timeOut = !masterBrokerVisibled.await(3, TimeUnit.SECONDS);
             if (timeOut) {
-              //  throw new ConductorRuntimeException("can`t connect to  master broker");
+                throw new ConductorRuntimeException("can`t connect to  master broker");
             }
         } catch (InterruptedException e) {
             LOGGER.error("线程等待被打断", e);

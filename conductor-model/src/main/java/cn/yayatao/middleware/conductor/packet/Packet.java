@@ -28,7 +28,9 @@ public interface Packet extends Serializable {
         AUTHENTICATION(8),
         AUTHENTICATION_RESULT(9),
         ERR_RESULT(10),
-        MASTER_CHANGED(11);
+        MASTER_CHANGED(11),
+        TASK_CMD_RESULT(12)
+        ;
 
 
         /***

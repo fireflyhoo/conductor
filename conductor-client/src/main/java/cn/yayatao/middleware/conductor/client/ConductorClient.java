@@ -3,7 +3,6 @@ package cn.yayatao.middleware.conductor.client;
 import cn.yayatao.middleware.conductor.client.broker.BrokerManager;
 import cn.yayatao.middleware.conductor.client.config.ClientConfig;
 import cn.yayatao.middleware.conductor.client.consumer.TaskExecutorManager;
-import cn.yayatao.middleware.conductor.client.exception.NetworkException;
 import cn.yayatao.middleware.conductor.client.producer.TaskSender;
 import cn.yayatao.middleware.conductor.client.producer.TaskSenderImpl;
 import cn.yayatao.middleware.conductor.client.tools.PacketTools;
@@ -33,7 +32,7 @@ public class ConductorClient {
     private final ClientConfig config;
     private final BrokerManager brokerManager;
     private final TaskExecutorManager taskExecutorManager;
-    private AtomicBoolean running = new AtomicBoolean();
+    private final AtomicBoolean running = new AtomicBoolean();
 
 
     public ConductorClient(ClientConfig config) {
@@ -71,13 +70,22 @@ public class ConductorClient {
      * 向主节点master 注册自己订阅,准备处理类
      */
     private void subscribeTopicForMaster() {
+        if (!config.isConsumeEnable()) {
+            LOGGER.warn("当前服务未启用延时任务消费...");
+            return;
+        }
+        List<String> topics = taskExecutorManager.getAllSubscribeTopics();
+        if (topics == null || topics.isEmpty()) {
+            LOGGER.warn("当前订阅的延时主题为空...");
+            return;
+        }
+
         RegisterTopic registerTopic = new RegisterTopic();
         registerTopic.setTaskTopic(taskExecutorManager.getAllSubscribeTopics());
         registerTopic.setClientGroup(config.getClientGroup());
         try {
-//            brokerManager.getBrokerMaster().send(
-//                    PacketTools.build(config.getAccessKeyId(), registerTopic));
-            System.out.println("xx");
+            brokerManager.getBrokerMaster().send(
+                    PacketTools.build(config.getAccessKeyId(), registerTopic));
         } catch (Exception e) {
             LOGGER.error("订阅topic出现错误");
         }

@@ -1,12 +1,10 @@
-package cn.yayatao.middleware;
+package cn.yayatao.middleware.conductor.schedule;
 
 import cn.yayatao.middleware.conductor.client.ConductorClient;
 import cn.yayatao.middleware.conductor.client.config.ClientConfig;
 import cn.yayatao.middleware.conductor.client.producer.TaskSender;
 import cn.yayatao.middleware.conductor.exception.ConductorException;
 import cn.yayatao.middleware.conductor.model.Task;
-import com.google.gson.Gson;
-import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

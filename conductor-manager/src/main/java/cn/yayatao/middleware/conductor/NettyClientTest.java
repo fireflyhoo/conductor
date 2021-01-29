@@ -1,5 +1,6 @@
 package cn.yayatao.middleware.conductor;
 
+import cn.yayatao.middleware.conductor.client.config.ClientConfig;
 import cn.yayatao.middleware.conductor.client.exception.NetworkException;
 import cn.yayatao.middleware.conductor.client.network.MessageChannel;
 import cn.yayatao.middleware.conductor.client.network.MessageChannelHandler;
@@ -32,7 +33,7 @@ public class NettyClientTest {
             public void caught(MessageChannel channel, Throwable throwable) {
 
             }
-        });
+        },new ClientConfig());
 
         nettyClient.send(MessageModel.MessagePacket.newBuilder().setId("8888").setData("heheheh").setType(1));
         nettyClient.send(MessageModel.MessagePacket.newBuilder().setId("8888").setData("heheheh").setType(1));

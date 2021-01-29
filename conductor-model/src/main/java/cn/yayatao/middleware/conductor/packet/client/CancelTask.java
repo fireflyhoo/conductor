@@ -2,7 +2,11 @@ package cn.yayatao.middleware.conductor.packet.client;
 
 import cn.yayatao.middleware.conductor.packet.Packet;
 
-public class CancelTask implements Packet {
+/**
+ * 取消任务
+ * @author fireflyhoo
+ */
+public class CancelTask extends ClientBase implements Packet {
 
     private int type = Type.CANCEL_TASK.getValue();
 
@@ -41,5 +45,14 @@ public class CancelTask implements Packet {
 
     public void setType(int type) {
         this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return "CancelTask{" +
+                "type=" + type +
+                ", taskTopic='" + taskTopic + '\'' +
+                ", taskKey='" + taskKey + '\'' +
+                '}';
     }
 }

@@ -5,6 +5,7 @@ import cn.yayatao.middleware.conductor.packet.Packet;
 
 /**
  * 响应结果
+ * @author fireflyhoo
  */
 public class AuthenticationResult implements Packet {
 
@@ -73,5 +74,16 @@ public class AuthenticationResult implements Packet {
 
     public void setMasterUrl(URL masterUrl) {
         this.masterUrl = masterUrl;
+    }
+
+    @Override
+    public String toString() {
+        return "AuthenticationResult{" +
+                "pass=" + pass +
+                ", jwt='" + jwt + '\'' +
+                ", masterUrl=" + masterUrl +
+                ", type=" + type +
+                ", message='" + message + '\'' +
+                '}';
     }
 }

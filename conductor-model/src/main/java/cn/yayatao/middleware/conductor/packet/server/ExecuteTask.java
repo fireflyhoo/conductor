@@ -5,6 +5,8 @@ import cn.yayatao.middleware.conductor.packet.Packet;
 
 /***
  * 执行任务命令
+ *
+ * @author fireflyhoo
  */
 public class ExecuteTask  implements Packet{
     private int type = Packet.Type.EXECUTE_TASK.getValue();
@@ -26,5 +28,13 @@ public class ExecuteTask  implements Packet{
 
     public void setTask(Task task) {
         this.task = task;
+    }
+
+    @Override
+    public String toString() {
+        return "ExecuteTask{" +
+                "type=" + type +
+                ", task=" + task +
+                '}';
     }
 }

@@ -7,6 +7,7 @@ import java.net.InetSocketAddress;
 
 /**
  * 消息通道
+ *
  * @author fireflyhoo
  */
 public interface MessageChannel {
@@ -19,25 +20,18 @@ public interface MessageChannel {
 
     /**
      * 获取当前的连接的本地端口
+     *
      * @return
      */
     InetSocketAddress getLocalAddress();
 
 
     /**
-     *  获取远程连接地址信息.
+     * 获取远程连接地址信息.
      *
      * @return remote address.
      */
     InetSocketAddress getRemoteAddress();
-
-
-    /***
-     * 设置最后活动时间
-     * @param lastActivityTime 最后活动时间戳
-     */
-    void setLastActivityTime(long lastActivityTime);
-
 
     /***
      *  获取最后活动时间
@@ -45,6 +39,11 @@ public interface MessageChannel {
      */
     long getLastActivityTime();
 
+    /***
+     * 设置最后活动时间
+     * @param lastActivityTime 最后活动时间戳
+     */
+    void setLastActivityTime(long lastActivityTime);
 
     /***
      * 发送消息
@@ -60,7 +59,7 @@ public interface MessageChannel {
      * @param timeout
      * @throws NetworkException
      */
-    void send(Object message, long timeout) throws  NetworkException;
+    void send(Object message, long timeout) throws NetworkException;
 
 
     /**
@@ -70,5 +69,19 @@ public interface MessageChannel {
      */
     boolean isClosed();
 
+
+    /**
+     * 是否连接成功
+     *
+     * @return
+     */
     boolean isConnected();
+
+
+    /**
+     * 关闭连接
+     *
+     * @return
+     */
+    void close();
 }

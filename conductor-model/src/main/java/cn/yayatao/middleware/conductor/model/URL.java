@@ -39,7 +39,7 @@ public class URL implements Serializable {
     public URL(String protocol, String host, int port, Map<String, String> parameters) {
         this.protocol = protocol;
         this.host = host;
-        this.port = (port < 0 ? 0 : port);
+        this.port = (Math.max(port, 0));
         if (parameters == null) {
             parameters = new HashMap<String, String>();
         } else {
@@ -56,7 +56,8 @@ public class URL implements Serializable {
         String host = null;
         int port = 0;
         Map<String, String> parameters = null;
-        int i = url.indexOf("?"); // seperator between body and parameters
+        // separator between body and parameters
+        int i = url.indexOf("?");
         if (i >= 0) {
             String[] parts = url.substring(i + 1).split("\\&");
             parameters = new HashMap<String, String>();

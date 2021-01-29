@@ -45,4 +45,13 @@ public class ErrorResult implements Packet {
     public void setMsg(String msg) {
         this.msg = msg;
     }
+
+    @Override
+    public String toString() {
+        return "ErrorResult{" +
+                "type=" + type +
+                ", errorCode=" + errorCode +
+                ", msg='" + msg + '\'' +
+                '}';
+    }
 }

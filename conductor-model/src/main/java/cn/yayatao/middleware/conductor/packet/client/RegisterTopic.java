@@ -8,7 +8,7 @@ import java.util.List;
  * 注册 需要订阅哪些topic
  * @author fireflyhoo
  */
-public class RegisterTopic implements Packet {
+public class RegisterTopic extends ClientBase implements Packet {
 
     private int type = Packet.Type.REGISTER_TOPIC.getValue();
 
@@ -48,5 +48,14 @@ public class RegisterTopic implements Packet {
 
     public void setClientGroup(String clientGroup) {
         this.clientGroup = clientGroup;
+    }
+
+    @Override
+    public String toString() {
+        return "RegisterTopic{" +
+                "type=" + type +
+                ", taskTopic=" + taskTopic +
+                ", clientGroup='" + clientGroup + '\'' +
+                '}';
     }
 }

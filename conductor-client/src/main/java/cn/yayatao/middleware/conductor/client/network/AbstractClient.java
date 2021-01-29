@@ -25,12 +25,13 @@ public abstract class AbstractClient implements MessageClient, MessageChannelHan
     private final Lock lock = new ReentrantLock(false);
     private final int closeTimeout = 1000;
 
-    private ClientConfig config = new ClientConfig();
+    private final ClientConfig config;
 
 
-    public AbstractClient(URL url, MessageChannelHandler channelHandler) throws NetworkException {
+    public AbstractClient(URL url, MessageChannelHandler channelHandler, ClientConfig config) throws NetworkException {
         this.url = url;
         this.channelHandler = channelHandler;
+        this.config = config;
         try {
             initClient();
         } catch (Throwable e) {
@@ -76,9 +77,9 @@ public abstract class AbstractClient implements MessageClient, MessageChannelHan
         lock.lock();
         try {
             MessageChannel channel = getChannel();
-//            if (channel != null) {
-//                channel.close(closeTimeout);
-//            }
+            if (channel != null) {
+                channel.close();
+            }
             try {
                 doDisconnect();
             } catch (Throwable ex) {

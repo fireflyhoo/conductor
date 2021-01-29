@@ -72,4 +72,15 @@ public class Task {
     public void setCreateTime(long createTime) {
         this.createTime = createTime;
     }
+
+    @Override
+    public String toString() {
+        return "Task{" +
+                "taskTopic='" + taskTopic + '\'' +
+                ", taskKey='" + taskKey + '\'' +
+                ", content='" + content + '\'' +
+                ", planTime=" + planTime +
+                ", createTime=" + createTime +
+                '}';
+    }
 }
