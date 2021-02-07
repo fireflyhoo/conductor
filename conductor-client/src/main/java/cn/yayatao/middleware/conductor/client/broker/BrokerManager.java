@@ -13,10 +13,7 @@ import cn.yayatao.middleware.conductor.model.URL;
 import cn.yayatao.middleware.conductor.packet.Packet;
 import cn.yayatao.middleware.conductor.packet.base.Ping;
 import cn.yayatao.middleware.conductor.packet.base.Pong;
-import cn.yayatao.middleware.conductor.packet.server.AuthenticationResult;
-import cn.yayatao.middleware.conductor.packet.server.ErrorResult;
-import cn.yayatao.middleware.conductor.packet.server.ExecuteTask;
-import cn.yayatao.middleware.conductor.packet.server.MasterChanged;
+import cn.yayatao.middleware.conductor.packet.server.*;
 import cn.yayatao.middleware.conductor.protobuf.MessageModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,10 +133,29 @@ public class BrokerManager {
             return;
         }
 
+        //出现异常
         if (packet instanceof ErrorResult){
             ErrorResult errorResult = (ErrorResult) packet;
             doHandleErrorResult(channel,errorResult);
+            return;
         }
+
+        if (packet instanceof CmdResult){
+            CmdResult cmdResult = (CmdResult) packet;
+            doHandleCmdResult(cmdResult);
+            return;
+        }
+
+        LOGGER.warn("出现未知数据包:" + packet);
+    }
+
+
+    /***
+     * 执行结果内容
+     * @param cmdResult
+     */
+    private void doHandleCmdResult(CmdResult cmdResult) {
+        LOGGER.info("xxx");
     }
 
 
