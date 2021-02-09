@@ -92,6 +92,7 @@ public class ScheduleMessageHandler implements MessageChannelHandler {
         // 取消任务
         if (packet instanceof CancelTask) {
             LOGGER.info("收到CancelTask数据包:{}", packet);
+
         }
 
         // 注册监听

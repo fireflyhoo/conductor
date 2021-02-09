@@ -4,6 +4,9 @@ package cn.yayatao.middleware.conductor.thread;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * @author fireflyhoo
+ */
 public class NamedThreadFactory implements ThreadFactory {
 
     public final String id;
@@ -33,8 +36,7 @@ public class NamedThreadFactory implements ThreadFactory {
 
     @Override
     public Thread newThread(Runnable r) {
-        String name = String.join("-", id, String.valueOf(n.getAndIncrement()));
-        Thread thread = new Thread(r, name);
+        Thread thread = new Thread(r, String.join("-", id, String.valueOf(n.getAndIncrement())));
         thread.setPriority(priority);
         if(this.daemon){
             thread.setDaemon(true);
