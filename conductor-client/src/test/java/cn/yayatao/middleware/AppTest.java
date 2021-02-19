@@ -44,11 +44,8 @@ public class AppTest {
         client.start();
         TaskSender sender = client.getSender();
         try {
-            sender.send(new Task());
-            sender.send(new Task());
-            sender.send(new Task());
-            sender.send(new Task());
-            sender.send(new Task());
+            sender.send(buildTask("dome-topic","111",10000));
+
         } catch (ConductorException e) {
             logger.info("xxx");
         }
@@ -56,5 +53,9 @@ public class AppTest {
         System.in.read();
         System.in.read();
         assertTrue(true);
+    }
+
+    private static Task buildTask(String topic, String key, int delayMs) {
+        return null;
     }
 }

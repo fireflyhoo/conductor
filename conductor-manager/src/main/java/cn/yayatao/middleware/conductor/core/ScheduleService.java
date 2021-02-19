@@ -22,14 +22,14 @@ public class ScheduleService implements InitializingBean, DisposableBean {
 
     private final static Logger LOGGER = LoggerFactory.getLogger(ScheduleService.class);
 
-    /**
-     * 调度核心
-     */
-    private final TaskScheduler taskScheduler = new TaskScheduler();
+
+    @Autowired
+    private TaskScheduler taskScheduler;
 
 
     @Autowired
     private ScheduleMessageHandler scheduleMessageHandler;
+
 
     private volatile NettyServer nettyServer;
 

@@ -1,6 +1,7 @@
 package cn.yayatao.middleware.conductor.storage;
 
 import cn.yayatao.middleware.conductor.model.Task;
+import cn.yayatao.middleware.conductor.utils.TaskTools;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -22,7 +23,7 @@ public class TaskMessageStoreManager {
      * @param task
      */
     public void save(Task task) {
-        map.put(String.join("-", task.getTaskTopic(), task.getTaskKey()), task);
+        map.put(TaskTools.getIdentity(task), task);
     }
 
 
@@ -42,6 +43,16 @@ public class TaskMessageStoreManager {
      */
     public Task get(String taskTopic, String taskKey) {
         return map.get(String.join("-", taskTopic, taskKey));
+    }
+
+
+    /***
+     * 获取任务消息
+     * @param identity 消息唯一key  (taskTopic-taskKey)
+     * @return
+     */
+    public Task get(String identity){
+        return map.get(identity);
     }
 
 
